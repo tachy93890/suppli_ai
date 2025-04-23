@@ -1,14 +1,51 @@
+# config/routes.rb
+require "sidekiq/web"
+
 Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+  ############################################################
+  # Authentication — friendly paths (login/logout/register)
+  ############################################################
+  devise_for :users, path: "", path_names: {
+    sign_in:  "login",
+    sign_out: "logout",
+    sign_up:  "register"
+  }
 
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
-  get "up" => "rails/health#show", as: :rails_health_check
+  ############################################################
+  # Admin-only Sidekiq dashboard
+  ############################################################
+  class AdminConstraint
+    def self.matches?(request)
+      user_id = request.session["warden.user.user.key"]&.dig(0, 0)
+      user_id && User.find_by(id: user_id)&.admin?
+    end
+  end
 
-  # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
-  # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
-  # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
+  constraints AdminConstraint do
+    mount Sidekiq::Web => "/sidekiq"
+  end
 
-  # Defines the root path route ("/")
-  # root "posts#index"
+  ############################################################
+  # Public landing page  (always /)
+  ############################################################
+  root "home#index"
+
+  ############################################################
+  # Dashboard for authenticated users
+  ############################################################
+  authenticated :user do
+    get "/dashboard", to: "products#index", as: :dashboard
+  end
+
+  ############################################################
+  # Application resources
+  ############################################################
+  resources :products
+  resources :categories, only: %i[index show]
+  resources :tags,       only: %i[index show]
+
+  ############################################################
+  # Health-check endpoint
+  ############################################################
+  get "/up", to: proc { [200, { "Content-Type" => "text/plain" }, ["OK"]] }
 end

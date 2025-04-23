@@ -1,0 +1,19 @@
+<!-- app/views/home/index.html.erb -->
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <h1 class="display-4 mb-4"><%= @title %></h1>
+
+      <div class="lead mb-5">
+        <%= raw @content %>
+      </div>
+
+      <% unless user_signed_in? %>
+        <%= link_to "Create a free account", register_path, class: "btn btn-primary btn-lg me-2" %>
+        <%= link_to "Log in", login_path, class: "btn btn-outline-primary btn-lg" %>
+      <% else %>
+        <%= link_to "Go to dashboard", dashboard_path, class: "btn btn-primary btn-lg" %>
+      <% end %>
+    </div>
+  </div>
+</div>
