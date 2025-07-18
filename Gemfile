@@ -26,7 +26,7 @@ gem "cssbundling-rails", "~> 1.3"
 gem "devise"                            # Authentication
 gem "pundit", "~> 2.3"                  # Authorization
 gem "sidekiq"                           # Background jobs (adapter set in config)
-gem "redis", "~> 4.0"                   # Sidekiq’s backend
+gem "redis", "~> 5.4"                   # Sidekiq’s backend
 gem "sidekiq-scheduler", require: false # Recurring/cron jobs
 gem "view_component"                    # Re‑usable, testable view objects
 gem "kaminari"                          # Pagination helper
